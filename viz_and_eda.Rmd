@@ -2,7 +2,7 @@
 title: "Viz_and_eda"
 author: "Priyal"
 date: "9/27/2018"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -154,5 +154,27 @@ weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) +
   geom_point(aes(color = name), alpha = .5) 
 
 ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5)
+```
+
+```{r}
+ggplot(weather_df, aes(x = prcp)) + 
+  geom_density(aes(fill = name), alpha = .5) 
+```
+
+```{r}
+ggplot(weather_df, aes(y = prcp, x = name)) + 
+  geom_boxplot() 
+```
+
+```{r}
+ggplot(weather_df, aes(y = prcp, x = name)) + 
+  geom_violin() 
+```
+
+```{r}
+weather_df %>% 
+  filter(prcp > 0) %>% 
+  ggplot(aes(x = prcp, y = name)) + 
+  geom_density(scale = .85)
 ```
 

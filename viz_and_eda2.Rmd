@@ -1,0 +1,184 @@
+---
+title: "Viz_and_eda2"
+author: "Priyal"
+date: "10/2/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+library(tidyverse)
+library(ggridges)
+```
+
+
+```{r}
+library(rnoaa)
+
+weather_df = 
+  rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+Labels and ticks
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  )
+```
+
+Always make data more descriptive by adding labels.
+
+Scale_x and scale_y
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  scale_x_continuous(breaks = c(-15, 0, 15), 
+labels = c("-15º C", "0", "15"),
+limits = c(-20, 42)
+)
+```
+
+Other scale_x and scale_y options
+
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  scale_x_continuous(breaks = c(-15, 0, 15), 
+                     labels = c("-15ºC", "0", "15"),
+                     limits = c(-20, 30)) + 
+  scale_y_continuous(trans = "sqrt", 
+                     position = "right")
+```
+
+### Color and Themes
+
+Adjusting color
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  scale_color_hue(name = "Location",h = c(100,350),
+                  l = 75)
+```
+
+Instead use viridis package
+
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  )+
+  theme(legend.position = "bottom")
+```
+
+
+### Themes
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) + 
+  labs(
+    title = "Temperature plot",
+    x = "Minimum daily temperature (C)",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) + 
+  theme(legend.position = "bottom")
+ + theme_bw()
+```
+
+
+Learning Assessment
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name, size = prcp)) +
+  geom_point() +
+  labs(
+    title = "Temperature vs date",
+    x = "Date",
+    y = "Maxiumum daily temperature (C)",
+    caption = "Data from the rnoaa package"
+  ) + 
+  viridis::scale_color_viridis(
+    name = "Location", 
+    discrete = TRUE
+  ) +
+  theme(legend.position = "bottom")
+```
+
+
+###Arguments to `geom*`
+
+
+```{r}
+central_park = 
+  weather_df %>% 
+  filter(name == "CentralPark_NY")
+
+waikiki = 
+  weather_df %>% 
+  filter(name == "Waikiki_HA")
+
+ggplot(waikiki, aes(x = date, y = tmax, color = name)) +
+  geom_point() +
+  geom_line(data = central_park)
+
+```
+
+You can stack the geom_point() on the waikiki ggplot
+
+### Patchwork
